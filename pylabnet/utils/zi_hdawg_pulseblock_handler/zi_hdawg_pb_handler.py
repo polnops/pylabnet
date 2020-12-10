@@ -1,5 +1,6 @@
 
 import numpy as np
+import math
 from pylabnet.utils.pulseblock.pb_sample import pb_sample
 from pylabnet.utils.pulseblock.pulse import PFalse
 
@@ -307,3 +308,113 @@ class DIOPulseBlockHandler():
 
             # Update current configuration
             current_config = new_config
+
+
+class AnalogSinePulseBlockHandler():
+
+    def __init__(self, pb, assignment_dict=None, hd=None):
+        """
+        # Specify the Aanalog outputs (from 0 to 7)
+        assignment_dict = {
+            'mw_device':   {
+                'channel' : 4,
+                'freq'  : 200e6,
+                'phase' : 45
+            },
+            'mw_second_device':   {
+                'channel' : 5,
+                'freq'  : 300e6,
+                'phase' : 90
+            }
+        }
+        """
+
+        # Use the log client of the HDAWG.
+        self.hd = hd
+        self.log = hd.log
+
+        # Store arguments.
+        self.pb = pb
+
+        self.assignment_dict = assignment_dict
+
+
+        # Prep osc_settings
+        self._prep_osc_settings()
+
+
+    def _prep_osc_settings(self):
+
+        for channel_dict in self.assignment_dict.values():
+
+            output_number = channel_dict['channel']
+
+            # Setup oscillator to desired frequency.
+            self.osc_num = math.floor(output_number/2)
+            self.hd.setd(f'oscs/{self.osc_num}/freq', channel_dict['freq'])
+
+            # Enable correct sine and set phase.
+            if output_number % 2 == 0:
+                self.hd.seti(f'sines/{output_number}/enables/0', 1)
+            else:
+                self.hd.seti(f'sines/{output_number}/enables/1', 1)
+
+            self.hd.setd(f'sines/{output_number}/phaseshift', channel_dict['phase'])
+
+
+
+if __name__ ==  "__main__":
+    from pylabnet.utils.logging.logger import LogClient
+
+    from pylabnet.hardware.awg.zi_hdawg import Driver, Sequence, AWGModule
+
+    import pylabnet.utils.pulseblock.pulse as po
+    import pylabnet.utils.pulseblock.pulse_block as pb
+    from pylabnet.utils.pulseblock.pb_iplot import iplot
+    from pylabnet.utils.pulseblock.pb_sample import pb_sample
+
+    dev_id = 'dev8227'
+
+    # Instantiate logger.
+    logger = LogClient(
+        host='140.247.189.80',
+        port=28961,
+        module_tag=f'ZI HDAWG {dev_id}'
+    )
+
+    # Instanciate HDAWG driver.
+    hd = Driver(dev_id, logger=logger)
+
+    # Let's choose a microwave duration of 1us.
+    tau = 1e-6
+    amp = 1
+    freq = 200e6
+    ph = 90
+
+
+    hdawg_sine = pb.PulseBlock(
+            p_obj_list=[
+                po.PSinHDAWG(ch='mw_device', dur=tau, t0=0, amp=amp, freq=freq, ph=ph),
+                po.PSinHDAWG(ch='mw_second_device', dur=tau, t0=tau*1.1, amp=amp, freq=freq, ph=ph)
+            ]
+        )
+
+    # Specify the Aanalog outputs (from 0 to 7)
+    assignment_dict = {
+        'mw_device':   {
+            'channel' : 4,
+            'freq'  : 200e6,
+            'phase' : 45
+        },
+        'mw_second_device':   {
+            'channel' : 5,
+            'freq'  : 300e6,
+            'phase' : 90
+        }
+    }
+
+    pb_parser = AnalogSinePulseBlockHandler(
+        pb=hdawg_sine,
+        assignment_dict=assignment_dict,
+        hd=hd
+    )
