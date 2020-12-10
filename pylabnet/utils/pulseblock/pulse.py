@@ -248,5 +248,42 @@ class DConst(DfltPulseBase):
 
         return ret_ar
 
+class PSinHDAWG(PulseBase):
+    """ Pulse: Sine
+    """
 
+    def __init__(self, ch, dur, t0=0, amp=0, freq=0, ph=0):
+        """ Construct PSinHDAWG Pulse object
 
+        :param ch: (str) channel name
+        :param dur: (numeric) duration of the pulse
+        :param t0: (opt, numeric) position of the pulse beginning
+        :param amp: (opt, np.float32) amplitude (zero-to-peak)
+        :param freq: (opt, np.float32) frequency (linear, without 2*pi)
+        :param ph: (opt, np.float32) phase (in degrees)
+        """
+
+        super().__init__(ch=ch, dur=dur, t0=t0)
+
+        self.amp = amp
+        self.freq = freq
+        self.ph = ph
+
+        # Define an automatic default.
+        self.auto_default = DConst(val=0.0)
+
+    def __str__(self):
+        ret_str = 'HDAWGSin(amp={:.2e} freq={:.2e} ph={:.2f})' \
+                  ''.format(self.amp, self.freq, self.ph)
+        return ret_str
+
+    @staticmethod
+    def get_value(t_ar):
+        """ Returns array of samples
+
+        :param t_ar: (numpy.array) array of time points
+        :return: (numpy.array(dtype=bool)) array of samples
+        """
+
+        t_ar_len = len(t_ar)
+        return np.full(t_ar_len, True)
