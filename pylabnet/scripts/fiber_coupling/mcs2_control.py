@@ -74,6 +74,13 @@ class Controller:
         self.press_up_z = QShortcut(QKeySequence('PgUp'), self.gui)
         self.press_down_z= QShortcut(QKeySequence('PgDown'), self.gui)
 
+        self.press_right_run = QShortcut(QKeySequence('d'), self.gui)
+        self.press_left_run = QShortcut(QKeySequence('a'), self.gui)
+        self.press_up_run = QShortcut(QKeySequence('w'), self.gui)
+        self.press_down_run = QShortcut(QKeySequence('s'), self.gui)
+        self.press_up_z_run = QShortcut(QKeySequence('e'), self.gui)
+        self.press_down_z_run = QShortcut(QKeySequence('q'), self.gui)
+
         self.widgets['keyboard_change_combo'].currentIndexChanged.connect(self._bind_arrow_keys)
 
 
@@ -85,6 +92,14 @@ class Controller:
         self.press_down.activated.disconnect()
         self.press_up_z.activated.disconnect()
         self.press_down_z.activated.disconnect()
+
+        # self.press_right_run.activated.disconnect()
+        # self.press_left_run.activated.disconnect()
+        # self.press_up_run.activated.disconnect()
+        # self.press_down_run.activated.disconnect()
+        # self.press_up_z_run.activated.disconnect()
+        # self.press_down_z_run.activated.disconnect()
+
 
 
     def _bind_arrow_keys(self):
@@ -98,19 +113,28 @@ class Controller:
         binding_index = self.widgets['keyboard_change_combo'].currentIndex()
 
         front_names = ['step_left', 'step_right', 'step_left', 'step_right', 'step_right', 'step_left']
+        front_walk_names = ['walk_left', 'walk_right', 'walk_left', 'walk_right',  'walk_right', 'walk_left']
         front_index = [6, 6, 1, 1, 5, 5]
+        front_walk_index = [6, 6, 1, 1, 5, 5]
 
         rear_names = ['step_right', 'step_left',  'step_right',  'step_left', 'step_right', 'step_left']
+        rear_walk_names = ['walk_right', 'walk_left', 'walk_right', 'walk_left',  'walk_right', 'walk_left']
+
         rear_index = [8, 8, 0, 0, 2, 2]
+        rear_walk_index = [8, 8, 0, 0, 2, 2]
 
         if binding_index == 0:
             return
         if binding_index == 1:
             names = front_names
             index = front_index
+            walk_names = front_walk_names
+            walk_index = front_walk_index
         elif binding_index == 2:
             names = rear_names
             index = rear_index
+            walk_names = rear_walk_names
+            walk_index = rear_walk_index
 
         self.press_right.activated.connect(lambda: self.widgets[names[0]][index[0]].animateClick())
         self.press_left.activated.connect(lambda: self.widgets[names[1]][index[1]].animateClick())
@@ -118,6 +142,13 @@ class Controller:
         self.press_down.activated.connect(lambda: self.widgets[names[3]][index[3]].animateClick())
         self.press_up_z.activated.connect(lambda: self.widgets[names[4]][index[4]].animateClick())
         self.press_down_z.activated.connect(lambda: self.widgets[names[5]][index[5]].animateClick())
+
+        # self.press_right_run.activated.connect(lambda: self.widgets[walk_names[0]][walk_index[0]].animateClick())
+        # self.press_left_run.activated.connect(lambda: self.widgets[walk_names[0]][walk_index[0]].animateClick())
+        # self.press_up_run.activated.connect(lambda: self.widgets[walk_names[0]][walk_index[0]].animateClick())
+        # self.press_down_run.activated.connect(lambda: self.widgets[walk_names[0]][walk_index[0]].animateClick())
+        # self.press_up_z_run.activated.connect(lambda: self.widgets[walk_names[0]][walk_index[0]].animateClick())
+        # self.press_down_z_run.activated.connect(lambda: self.widgets[walk_names[0]][walk_index[0]].animateClick())
 
 
     def initialize_parameters(self, channel, params):
